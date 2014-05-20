@@ -26,7 +26,7 @@ setup(
     include_package_data=True,
     install_requires=['requests', 'six'],
     license='Apache 2.0',
-    classifiers=(
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Natural Language :: English',
@@ -37,5 +37,5 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
-    ),
+    ],
 )

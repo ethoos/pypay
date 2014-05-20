@@ -9,6 +9,7 @@ Under the hood pypay uses the excellent `Requests <https://github.com/kennethrei
 Installation
 ------------
 
+
 .. sourcecode:: bash
 
     pip install pypay
@@ -19,6 +20,7 @@ Usage
 
 To check a payment via `PDT <https://developer.paypal.com/docs/classic/paypal-payments-standard/integration-guide/paymentdatatransfer/>`_
 
+
 .. sourcecode:: python
 
     import pypay
@@ -28,6 +30,7 @@ To check a payment via `PDT <https://developer.paypal.com/docs/classic/paypal-pa
 
 To check a payment via `IPN <https://developer.paypal.com/docs/classic/ipn/integration-guide/IPNIntro/>`_
 
+
 .. sourcecode:: python
 
     import pypay
@@ -36,6 +39,7 @@ To check a payment via `IPN <https://developer.paypal.com/docs/classic/ipn/integ
 
 
 Response objects always have two properties
+
 
 .. sourcecode:: python
 
@@ -47,9 +51,9 @@ Response objects always have two properties
 Handling exceptions
 ~~~~~~~~~~~~~~~~~~~
 
-In the event of a problem making the http call to Paypal a ``pypay.exceptions.RequestError`` will be thrown.
+In the event of a problem making the http call to Paypal, pypay will raise a ``pypay.exceptions.RequestError``.
 
-The values passed to ``pdt_confirm`` and ``ipn_confirm`` are sanity checked and a ``pypay.exceptions.InvalidPaypalData`` will be thrown if they are of the wrong type.
+The values passed to ``pdt_confirm`` and ``ipn_confirm`` are sanity checked and a ``pypay.exceptions.InvalidPaypalData`` will be raised if they are of the wrong type.
 
 
 Python version support
@@ -63,9 +67,11 @@ Running tests
 
 Run the test suite with `Tox <http://tox.readthedocs.org/en/latest/>`_
 
+
 .. sourcecode:: bash
 
     pip install tox
+
 
 
 Tests are written with `pytest <http://pytest.org/latest/>`_

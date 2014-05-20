@@ -35,8 +35,14 @@ To check a payment via `IPN <https://developer.paypal.com/docs/classic/ipn/integ
 
     import pypay
 
-    response = pypay.ipn_confirm('query_string_from_paypal')
+    response = pypay.ipn_confirm('query_params_from_paypal')
 
+
+You can pass the query params as either a string (e.g. 'quantity=1&name=joe') or a dict. This is particularly useful if you're using Django as you can drop in request.POST and everything with just work.
+
+
+Response objects
+~~~~~~~~~~~~~~~~~~~
 
 Response objects always have two properties
 

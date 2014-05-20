@@ -76,20 +76,23 @@ class PaypalPDT(PaypalPayments):
 
 class PaypalIPN(PaypalPayments):
     """
-    For a given query string confirm a payment via Paypal IPN and
+    For a given set of query params confirm a payment via Paypal IPN and
     process the response
     """
     
-    def __init__(self, query_string, sandbox=False):
-        if not isinstance(query_string, six.string_types):
-            raise InvalidPaypalData('{0} is not a valid IPN query string'.format(query_string))
-        self.query_string = query_string
+    def __init__(self, query_params, sandbox=False):
+        if isinstance(query_params, six.string_types):
+            self.query_params = query_params
+        elif isinstance(query_params, dict):
+            self.query_params = urllib.parse.urlencode(query_params)
+        else:
+            raise InvalidPaypalData('{0} is not a valid IPN query string'.format(query_params))
         self.sandbox = sandbox
     
     def send_confirmation(self):
         endpoint = self.live_endpoint if not self.sandbox else self.sandbox_endpoint
         headers = {'content_type': 'x-www-form-urlencoded'}
-        post_url = '{0}?{1}&{2}'.format(endpoint, 'cmd=_notify-validate', self.query_string)
+        post_url = '{0}?{1}&{2}'.format(endpoint, 'cmd=_notify-validate', self.query_params)
         try:
             self.response = requests.post(post_url, headers=headers)
         except requests.exceptions.RequestException as e:
@@ -103,4 +106,4 @@ class PaypalIPN(PaypalPayments):
                 self.confirmed = True
             else:
                 self.confirmed = False
-        self.details = dict((k, v[0].strip()) for (k, v) in urllib.parse.parse_qs(self.query_string, keep_blank_values=True).items()) # no dict comprehensions in Python 2.6 :(
+        self.details = dict((k, v[0].strip()) for (k, v) in urllib.parse.parse_qs(self.query_params, keep_blank_values=True).items()) # no dict comprehensions in Python 2.6 :(

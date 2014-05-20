@@ -111,11 +111,15 @@ class TestPaypalPDT(object):
 
 class TestPaypalIPN(object):
     
-    def test_string_query_string_is_accepted(self):
-        ipn = pypay.payments.PaypalIPN('tx=id')
-        assert ipn.query_string == 'tx=id'
+    def test_string_for_query_params_is_accepted(self):
+        ipn = pypay.payments.PaypalIPN('tx=id&name=Joe')
+        assert ipn.query_params == 'tx=id&name=Joe'
     
-    def test_non_string_query_string_raises_invalid_paypal_data(self):
+    def test_dict_for_query_params_is_accepted_and_urlencoded(self):
+        ipn = pypay.payments.PaypalIPN({'tx': 'id', 'name': 'Joe De\'jure'})
+        assert ipn.query_params == 'name=Joe+De%27jure&tx=id' or ipn.query_params == 'tx=id&name=Joe+De%27jure'
+    
+    def test_non_string_or_dict_query_params_raises_invalid_paypal_data(self):
         with pytest.raises(pypay.exceptions.InvalidPaypalData):
             ipn = pypay.payments.PaypalIPN(123)
     

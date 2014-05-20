@@ -40,3 +40,11 @@ class TestIPNConfirmAPI(object):
         assert isinstance(response, pypay.payments.PaypalResponse)
         assert response.confirmed
         assert response.details == {'first_name': 'Joe Black', 'item_number': ''}
+    
+    def test_ipn_confirm_returns_correct_data_when_passed_a_dict(self, mrf):
+        mock_response = mrf.response('VERIFIED')
+        mock_post = mock.MagicMock(return_value=mock_response)
+        query = {'first_name': 'Joe Black', 'item_number': ''}
+        with mock.patch('pypay.payments.requests.post', mock_post):
+            response = pypay.ipn_confirm(query)
+        assert response.details == {'first_name': 'Joe Black', 'item_number': ''}

@@ -9,21 +9,21 @@ class PaypalPayments(object):
     Base Paypal payments class. Defines endpoints and allows a processed
     Paypal response to be conferted into a PaypalResponse object
     """
-    
+
     live_endpoint = 'https://www.paypal.com/cgi-bin/webscr'
     sandbox_endpoint = 'https://www.sandbox.paypal.com/cgi-bin/webscr'
-    
+
     sandbox = False
     response = None
     confirmed = False
     details = None
-    
+
     def send_confirmation(self):
         raise NotImplementedError()
-    
+
     def process_response(self):
         raise NotImplementedError()
-    
+
     def to_paypal_response(self):
         return PaypalResponse(self.confirmed, self.details)
 
@@ -32,7 +32,7 @@ class PaypalResponse(object):
     """
     Wrapper around Paypal response data for more consistent api
     """
-    
+
     def __init__(self, confirmed, details):
         self.confirmed = confirmed
         self.details = details
@@ -43,7 +43,7 @@ class PaypalPDT(PaypalPayments):
     For a given TransactionID confirm a payment via Paypal PDT and
     process the response
     """
-    
+
     def __init__(self, transaction_id, identity_token, sandbox=False):
         if not transaction_id or not isinstance(transaction_id, six.string_types):
             raise InvalidPaypalData('{0} is not a valid Paypal TransactionID'.format(transaction_id))
@@ -52,7 +52,7 @@ class PaypalPDT(PaypalPayments):
         self.transaction_id = transaction_id
         self.identity_token = identity_token
         self.sandbox = sandbox
-    
+
     def send_confirmation(self):
         endpoint = self.live_endpoint if not self.sandbox else self.sandbox_endpoint
         params = {'cmd': '_notify-synch', 'tx': self.transaction_id, 'at': self.identity_token}
@@ -62,15 +62,21 @@ class PaypalPDT(PaypalPayments):
             raise RequestError(e.args[0])
         if self.response.status_code != 200:
             raise RequestError('Paypal returned a {0} status'.format(self.response.status_code))
-    
+
     def process_response(self):
         if self.response:
             data = self.response.text.strip().split('\n')
-            self.confirmed = True if data[0].strip() == 'SUCCESS' else False
+            status = data[0].strip().upper()
+            if status == 'SUCCESS':
+                self.confirmed = True
+                separator = '='
+            elif status == 'FAIL':
+                self.confirmed = False
+                separator = ':'
             self.details = {}
             for field in data[1:]:
                 if field:
-                    name, value = field.split('=', 1)
+                    name, value = field.split(separator, 1)
                     self.details[name] = urllib.parse.unquote_plus(value.strip())
 
 
@@ -79,7 +85,7 @@ class PaypalIPN(PaypalPayments):
     For a given set of query params confirm a payment via Paypal IPN and
     process the response
     """
-    
+
     def __init__(self, query_params, sandbox=False):
         if isinstance(query_params, six.string_types):
             self.query_params = query_params
@@ -88,7 +94,7 @@ class PaypalIPN(PaypalPayments):
         else:
             raise InvalidPaypalData('{0} is not a valid IPN query string'.format(query_params))
         self.sandbox = sandbox
-    
+
     def send_confirmation(self):
         endpoint = self.live_endpoint if not self.sandbox else self.sandbox_endpoint
         headers = {'content_type': 'x-www-form-urlencoded'}
@@ -99,7 +105,7 @@ class PaypalIPN(PaypalPayments):
             raise RequestError(e.args[0])
         if self.response.status_code != 200:
             raise RequestError('Paypal returned a {0} status'.format(self.response.status_code))
-    
+
     def process_response(self):
         if self.response:
             if self.response.text.strip() == 'VERIFIED':

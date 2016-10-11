@@ -66,10 +66,11 @@ class PaypalPDT(PaypalPayments):
     def process_response(self):
         if self.response:
             data = self.response.text.strip().split('\n')
-            if data[0].strip() == 'SUCCESS':
+            status = data[0].strip().upper()
+            if status == 'SUCCESS':
                 self.confirmed = True
                 separator = '='
-            elif data[0].strip() == 'FAIL':
+            elif status == 'FAIL':
                 self.confirmed = False
                 separator = ':'
             self.details = {}
